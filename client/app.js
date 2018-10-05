@@ -31,9 +31,19 @@ const getData = (url = '', query) => {
     .then(response => response.json()); // parses response to JSON
 };
 
-const askDialogueFlow = () => {
+const askDialogueFlow = (msg, command) => {
+  shell.exec('clear');
+  if (msg) {
+    console.log(`bot: ${msg}`);
+  }
+  if (command) {
+    console.log(`bot: ${command}`);
+    shell.exec(command);
+  }
   const pwd = shell.exec('pwd', { silent: true }).stdout;
-  console.log(`You\'re in ${pwd}What do you want to ask the bot? (type exit to quit)`);
+  console.log('');
+  console.log(`You\'re in ${pwd}What do you want the bot to do? (type exit to quit)`);
+  console.log('');
   prompt.get(['query'], (err, result) => {
     if (err) {
       console.error(err);
@@ -42,18 +52,12 @@ const askDialogueFlow = () => {
       getData('https://api.dialogflow.com/v1/query?', result.query)
         .then(data => {
           const speech = data.result.fulfillment.speech;
-          if (speech.slice(0, 3) === 'git') {
-            shell.exec(speech);
+          if (speech[0] === '%') {
+            const command = speech.substring(1);
+            askDialogueFlow(null, command);
           } else {
-            console.log(`bot: ${speech}`);
+            askDialogueFlow(`${speech}`, null);
           }
-          prompt.get(['press any key to continue'], (err, result) => {
-            if (err) {
-              console.error(err);
-            }
-            shell.exec('clear');
-            askDialogueFlow();
-          }, 10000);
         }) // JSON-string from `response.json()` call
         .catch(error => console.error(error));
     } else {
